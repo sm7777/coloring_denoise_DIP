@@ -30,38 +30,56 @@ class Filtering:
         
         # S_max: Maximum allowed size of the window that is used in adaptive median filter
         self.S_max = 15
+    
 
     def get_arithmetic_mean(self, roi):
         """Computes the arithmetic mean of the input roi
         takes as input:
         roi: region of interest (a list/array of intensity values)
         returns the arithmetic mean value of the roi"""
-        
-        return 0
+        return sum(roi)/len(roi)
 
     def get_geometric_mean(self, roi):
         """Computes the geometric mean for the input roi
         takes as input:
         roi: region of interest (a list/array of intensity values)
         returns the geometric mean value of the roi"""
-        
-        return 0
+        roi = self.flatten_array(self, roi)
+        product = 1
+        for intensity in roi:
+            product = product * intensity
+
+        return product ** (1/ len(roi))
+    
 
     def get_local_noise(self, roi):
         """Computes the local noise reduction value
         takes as input:
         roi: region of interest (a list/array of intensity values)
         returns the local noise reduction value of the roi"""
-        
-        return 0
+
+        local_mean = self.get_arithmetic_mean(roi)
+        sum = 0
+        for num in roi:
+            sum = sum + (num - local_mean) ** 2
+  
+        return sum / len(roi)
 
     def get_median(self, roi):
         """Computes the median for the input roi
         takes as input:
         roi: region of interest (a list/array of intensity values)
         returns the median value of the roi"""
+        nums = sorted(roi)
+        if len(nums) % 2 == 0:
+            low_i = len(nums)/2
+            high_i = low_i + 1
+            median = (nums[low_i] + nums[high_i]) / 2.0
+        else:
+            index = (len(nums) // 2) + 1
+            median = nums[index]
         
-        return 0
+        return median
 
 
     def get_adaptive_median(self):
