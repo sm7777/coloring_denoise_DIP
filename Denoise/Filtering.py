@@ -1,3 +1,5 @@
+import math
+import dip
 
 class Filtering:
 
@@ -89,6 +91,22 @@ class Filtering:
         """
         
         return 0
+    
+    def zero_pad(self, image, filter):
+        zeros_to_add = math.sqrt(len(filter)) // 2
+        h,w = image.shape
+        zph, zpw = h+(zeros_to_add * 2), w+(zeros_to_add * 2)
+        zero_padded_image = dip.zeros((zph,zpw))
+
+        ii = 0
+        jj = 0
+        for i in range(zeros_to_add, zpw - zeros_to_add):
+            for j in range(zeros_to_add, zph - zeros_to_add):
+                zero_padded_image[i][j] = image[ii][jj]
+                jj += 1
+            ii += 1
+
+        return zero_padded_image
 
 
     def filtering(self):
