@@ -1,3 +1,4 @@
+
 """dip_hw4_filter.py: Starter file to run howework 4"""
 
 #Example Usage: ./dip_hw_filter -i Lenna.png

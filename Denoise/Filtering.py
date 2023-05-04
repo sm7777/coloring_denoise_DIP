@@ -46,7 +46,6 @@ class Filtering:
         takes as input:
         roi: region of interest (a list/array of intensity values)
         returns the geometric mean value of the roi"""
-        roi = self.flatten_array(self, roi)
         product = 1
         for intensity in roi:
             product = product * intensity
@@ -92,19 +91,15 @@ class Filtering:
         
         return 0
     
-    def zero_pad(self, image, filter):
-        zeros_to_add = math.sqrt(len(filter)) // 2
-        h,w = image.shape
-        zph, zpw = h+(zeros_to_add * 2), w+(zeros_to_add * 2)
-        zero_padded_image = dip.zeros((zph,zpw))
+    def zero_pad(self, image, pad):
+        dimensions = image.shape
+        width = dimensions[0] + 2 * pad
+        height = dimensions[1] + 2 * pad
+        zero_padded_image = dip.zeros((width, height))
 
-        ii = 0
-        jj = 0
-        for i in range(zeros_to_add, zpw - zeros_to_add):
-            for j in range(zeros_to_add, zph - zeros_to_add):
-                zero_padded_image[i][j] = image[ii][jj]
-                jj += 1
-            ii += 1
+        for row in range(dimensions[0]):
+            for col in range(dimensions[1]):
+                zero_padded_image[row + pad][col + pad] = image[row][col]
 
         return zero_padded_image
 
@@ -129,6 +124,28 @@ class Filtering:
         the adaptive median filter as it has two stages, you are welcome to do that.
         For the adaptive median filter assume that S_max (maximum allowed size of the window) is 15
         """
-                       
-        return self.image
+
+        pad = self.filter_size // 2
+        zp_image = self.zero_pad(self.image, pad)
+        
+        rows, cols = zp_image.shape
+        
+        dims = self.image.shape
+        new_image = dip.zeros(dims)
+
+        for i in range(pad, rows - pad):
+            for j in range(pad, cols - pad):
+                ii = -pad
+                jj = -pad
+                roi = []
+                for roi_i in range(self.filter_size):
+                    for roi_j in range(self.filter_size):
+                        roi.append(zp_image[i + ii][j + jj])
+                        jj += 1
+                    jj = -pad
+                    ii += 1
+                new_image[i-pad][j-pad] = self.filter(roi)
+
+                  
+        return new_image
 
