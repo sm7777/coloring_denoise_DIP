@@ -35,8 +35,6 @@ class Coloring:
 
         for i in range(rows):
             for j in range(cols):
-                if image[i,j] == 0:
-                    continue
                 interval = int((image[i,j] - 1) // interval_size)
                 color_image[i,j] = colors[interval]
 
@@ -74,8 +72,6 @@ class Coloring:
 
         for i in range(rows):
             for j in range(cols):
-                if image[i,j] == 0:
-                    continue
                 interval = int((image[i,j] - 1) // interval_size)
                 color_image[i,j] = colors[interval]
 
