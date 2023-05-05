@@ -35,7 +35,7 @@ class Coloring:
 
         for i in range(rows):
             for j in range(cols):
-                interval = int((image[i,j] - 1) // interval_size)
+                interval = int((image[i,j]) // interval_size)
                 color_image[i,j] = colors[interval]
 
         return color_image
@@ -67,12 +67,12 @@ class Coloring:
             coi = ((((k+1) * interval_size)-(k * interval_size))/2) + (k * interval_size)
             red = 255 * math.sin(coi + theta[0])
             green = 255 * math.sin(coi + theta[1])
-            blue = 255 * math.sin(coi + theta[1])
+            blue = 255 * math.sin(coi + theta[2])
             colors[k] = (red,green,blue)
 
         for i in range(rows):
             for j in range(cols):
-                interval = int((image[i,j] - 1) // interval_size)
+                interval = int((image[i,j]) // interval_size)
                 color_image[i,j] = colors[interval]
 
         return color_image
