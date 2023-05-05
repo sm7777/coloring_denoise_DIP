@@ -32,6 +32,8 @@ class Filtering:
         
         # S_max: Maximum allowed size of the window that is used in adaptive median filter
         self.S_max = 15
+
+        self.orig_filter_size = filter_size
     
 
     def get_arithmetic_mean(self, roi):
@@ -58,13 +60,22 @@ class Filtering:
         takes as input:
         roi: region of interest (a list/array of intensity values)
         returns the local noise reduction value of the roi"""
-
+        self.global_var
         local_mean = self.get_arithmetic_mean(roi)
+        g_xy = roi[(len(roi) // 2) + 1]
+        local_mean = self.get_arithmetic_mean(roi)
+
         sum = 0
         for num in roi:
             sum = sum + (num - local_mean) ** 2
-  
-        return sum / len(roi)
+
+        local_var = sum / len(roi)
+
+        if self.global_var == 0:
+            return g_xy
+        else:
+            return g_xy - (self.global_var / local_var)*(g_xy - local_mean)
+
 
     def get_median(self, roi):
         """Computes the median for the input roi
@@ -81,27 +92,90 @@ class Filtering:
             median = nums[index]
         
         return median
-
-
-    def get_adaptive_median(self):
-        """Use this function to implment the adaptive median.
-        It is left up to the student to define the input to this function and call it as needed. Feel free to create
-        additional functions as needed.
-        """
-        
-        return 0
     
-    def zero_pad(self, image, pad):
-        dimensions = image.shape
+    def zero_pad(self):
+
+        if self.filter == self.get_adaptive_median:
+            pad = self.S_max // 2
+        else:
+            pad = self.filter_size // 2
+
+        dimensions = self.image.shape
         width = dimensions[0] + 2 * pad
         height = dimensions[1] + 2 * pad
         zero_padded_image = dip.zeros((width, height))
 
         for row in range(dimensions[0]):
             for col in range(dimensions[1]):
-                zero_padded_image[row + pad][col + pad] = image[row][col]
+                zero_padded_image[row + pad][col + pad] = self.image[row][col]
 
         return zero_padded_image
+    
+    def get_roi(self, zp_image, xy):
+
+        x = xy[0]
+        y = xy[1]
+
+        i_start = -(self.filter_size // 2)
+        i_end = i_start + self.filter_size
+        j_start = -(self.filter_size // 2)
+        j_end = j_start + self.filter_size
+        roi = []
+
+        for i in range(i_start, i_end):
+            for j in range(j_start, j_end):
+                roi.append(zp_image[x + i][y + j])
+
+        return roi
+    
+    
+    def get_adaptive_median(self):
+        """Use this function to implment the adaptive median.
+        It is left up to the student to define the input to this function and call it as needed. Feel free to create
+        additional functions as needed.
+        """
+        rows, cols = self.image.shape
+        new_image = dip.zeros((rows, cols))
+        zp_image = self.zero_pad()
+        pad = self.S_max // 2
+
+        for i in range(rows):
+            self.filter_size = self.orig_filter_size
+            for j in range(cols):
+                roi = self.get_roi(zp_image, (i + pad, j + pad))
+
+                z_min = 0
+                z_max = 0
+                z_med = 0
+                z_xy = 0
+
+                #Level A
+                while(self.filter_size < self.S_max):
+                    
+                    z_min = min(roi)
+                    z_max = max(roi)
+                    z_med = self.get_median(roi)
+                    z_xy = self.image[i,j]
+
+                    A1 = z_med - z_min
+                    A2 = z_med - z_max
+
+                    if A1 > 0 and A2 < 0:
+                        break
+                    else:
+                        self.filter_size += 2
+                        roi = self.get_roi(zp_image, (i + pad, j + pad))
+
+                #level B
+                B1 = z_xy - z_min
+                B2 = z_xy - z_max
+                if B1 > 0 and B2 < 0:
+                     new_image[i,j] = z_xy
+                else:
+                    new_image[i,j] = z_med
+
+
+        return new_image
 
 
     def filtering(self):
@@ -125,26 +199,22 @@ class Filtering:
         For the adaptive median filter assume that S_max (maximum allowed size of the window) is 15
         """
 
-        pad = self.filter_size // 2
-        zp_image = self.zero_pad(self.image, pad)
-        
-        rows, cols = zp_image.shape
-        
         dims = self.image.shape
         new_image = dip.zeros(dims)
 
-        for i in range(pad, rows - pad):
-            for j in range(pad, cols - pad):
-                ii = -pad
-                jj = -pad
-                roi = []
-                for roi_i in range(self.filter_size):
-                    for roi_j in range(self.filter_size):
-                        roi.append(zp_image[i + ii][j + jj])
-                        jj += 1
-                    jj = -pad
-                    ii += 1
-                new_image[i-pad][j-pad] = self.filter(roi)
+        if self.filter == self.get_adaptive_median:
+            new_image = self.get_adaptive_median()
+
+        else:
+
+            pad = self.filter_size // 2
+            zp_image = self.zero_pad()
+            rows, cols = zp_image.shape
+
+            for i in range(pad, rows - pad):
+                for j in range(pad, cols - pad):
+                    roi = self.get_roi(zp_image, (i,j))
+                    new_image[i-pad][j-pad] = self.filter(roi)
 
                   
         return new_image
