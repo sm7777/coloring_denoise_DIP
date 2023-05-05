@@ -140,8 +140,8 @@ class Filtering:
         pad = self.S_max // 2
 
         for i in range(rows):
-            self.filter_size = self.orig_filter_size
             for j in range(cols):
+                self.filter_size = self.orig_filter_size
                 roi = self.get_roi(zp_image, (i + pad, j + pad))
 
                 z_min = 0
