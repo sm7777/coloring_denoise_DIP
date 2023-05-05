@@ -1,3 +1,7 @@
+import dip
+import math
+
+
 class Coloring:
 
     def intensity_slicing(self, image, n_slices):
@@ -16,8 +20,26 @@ class Coloring:
  
        returns colored image
        '''
+        interval_size = math.ceil((dip.max(image) - dip.min(image)) / (n_slices + 1))
 
-        return image
+        rows, cols = image.shape
+        color_image = dip.zeros(image.shape + (3,), dtype=dip.uint8)
+        colors = dip.zeros((n_slices + 1, 3), dtype = dip.uint8)
+
+        for i in range(n_slices + 1):
+            red = dip.random.randint(0,255)
+            green = dip.random.randint(0,255)
+            blue = dip.random.randint(0,255)
+            colors[i] = (red,green,blue)
+
+        for i in range(rows):
+            for j in range(cols):
+                if image[i,j] == 0:
+                    continue
+                interval = int((image[i,j] - 1) // interval_size)
+                color_image[i,j] = colors[interval]
+
+        return color_image
 
     def color_transformation(self, image, n_slices, theta):
         '''
