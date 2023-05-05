@@ -4,6 +4,7 @@ import math
 
 class Coloring:
 
+
     def intensity_slicing(self, image, n_slices):
         '''
        Convert greyscale image to color image using color slicing technique.
@@ -59,7 +60,26 @@ class Coloring:
         returns colored image
         '''
 
-        return image
+        interval_size = math.ceil((dip.max(image) - dip.min(image)) / (n_slices + 1))
+        rows, cols = image.shape
+        color_image = dip.zeros(image.shape + (3,), dtype=dip.uint8)
+        colors = dip.zeros((n_slices + 1, 3), dtype = dip.uint8)
+
+        for k in range(n_slices + 1):
+            coi = ((((k+1) * interval_size)-(k * interval_size))/2) + (k * interval_size)
+            red = 255 * math.sin(coi + theta[0])
+            green = 255 * math.sin(coi + theta[1])
+            blue = 255 * math.sin(coi + theta[1])
+            colors[k] = (red,green,blue)
+
+        for i in range(rows):
+            for j in range(cols):
+                if image[i,j] == 0:
+                    continue
+                interval = int((image[i,j] - 1) // interval_size)
+                color_image[i,j] = colors[interval]
+
+        return color_image
 
 
 
