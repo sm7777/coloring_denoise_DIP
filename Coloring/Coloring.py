@@ -21,7 +21,7 @@ class Coloring:
  
        returns colored image
        '''
-        interval_size = math.ceil((dip.max(image) - dip.min(image)) / (n_slices + 1))
+        interval_size = (dip.max(image) - dip.min(image)) / (n_slices + 1)
 
         rows, cols = image.shape
         color_image = dip.zeros(image.shape + (3,), dtype=dip.uint8)
@@ -36,6 +36,8 @@ class Coloring:
         for i in range(rows):
             for j in range(cols):
                 interval = int((image[i,j]) // interval_size)
+                if (interval > n_slices):
+                    interval = n_slices
                 color_image[i,j] = colors[interval]
 
         return color_image
@@ -73,6 +75,8 @@ class Coloring:
         for i in range(rows):
             for j in range(cols):
                 interval = int((image[i,j]) // interval_size)
+                if (interval > n_slices):
+                    interval = n_slices
                 color_image[i,j] = colors[interval]
 
         return color_image
